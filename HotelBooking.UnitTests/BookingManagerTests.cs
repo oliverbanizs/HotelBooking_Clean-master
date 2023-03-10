@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HotelBooking.Core;
 using HotelBooking.UnitTests.Fakes;
+using Moq;
 using Xunit;
 
 namespace HotelBooking.UnitTests
@@ -18,7 +19,6 @@ namespace HotelBooking.UnitTests
             IRepository<Room> roomRepository = new FakeRoomRepository();
             bookingManager = new BookingManager(bookingRepository, roomRepository);
         }
-
         [Fact]
         public void FindAvailableRoom_StartDateNotInTheFuture_ThrowsArgumentException()
         {
@@ -57,5 +57,29 @@ namespace HotelBooking.UnitTests
             Assert.Throws<ArgumentException>(act);
         }
 
+        [Fact]
+        public void CreateBooking_RoomAvailable_BookingCreated()
+        {
+            // Arrange
+            DateTime startDate = DateTime.Today.AddDays(1);
+            DateTime endDate = DateTime.Today.AddDays(5);
+            var booking = new Booking
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                IsActive = false,
+                CustomerId = 1,
+                RoomId = -1
+            };
+
+            // Act
+            bool result = bookingManager.CreateBooking(booking);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(1, booking.RoomId);
+        }
+
     }
+
 }
